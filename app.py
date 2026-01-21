@@ -5,6 +5,9 @@ import jwt
 import psycopg2, psycopg2.extras
 import bcrypt
 from auth_middleware import token_required
+# Add to stack of imports
+from auth_blueprint import authentication_blueprint
+
 
 load_dotenv()
 
