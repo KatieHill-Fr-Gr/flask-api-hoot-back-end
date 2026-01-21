@@ -4,14 +4,14 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "*"
 psycopg2 = "*"
 flask-dotenv = "*"
 pyjwt = "*"
 python-dotenv = "*"
 bcrypt = "*"
+flask = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.12"
+python_version = "3.13"
