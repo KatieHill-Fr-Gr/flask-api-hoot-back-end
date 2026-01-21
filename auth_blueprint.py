@@ -14,7 +14,11 @@ authentication_blueprint = Blueprint('authentication_blueprint', __name__)
 @authentication_blueprint.route('/auth/sign-up', methods=['POST'])
 def sign_up():
     try:
-        new_user_data = request.get_json()
+        new_user_data = request.get_json() or {}
+        username = str(new_user_data.get("username", ""))
+        password = str(new_user_data.get("password", ""))
+        if not username or not password:
+            return jsonify({"err": "Username and password required"}), 400
         connection = get_db_connection()
         cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute("SELECT * FROM users WHERE username = %s;", (new_user_data["username"],))
@@ -22,7 +26,7 @@ def sign_up():
         if existing_user:
             cursor.close()
             return jsonify({"err": "Username already taken"}), 400
-        hashed_password = bcrypt.hashpw(bytes(new_user_data["password"], 'utf-8'), bcrypt.gensalt())
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s) RETURNING id, username", (new_user_data["username"], hashed_password.decode('utf-8')))
         created_user = cursor.fetchone()
         connection.commit()
@@ -54,28 +58,28 @@ def sign_in():
     finally:
         connection.close()
 
-# @app.route('/users')
-# @token_required
-# def users_index():
-#     connection = get_db_connection()
-#     cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-#     cursor.execute("SELECT id, username FROM users;")
-#     users = cursor.fetchall()
-#     connection.close()
-#     return jsonify(users), 200
+@authentication_blueprint.route('/users')
+@token_required
+def users_index():
+    connection = get_db_connection()
+    cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cursor.execute("SELECT id, username FROM users;")
+    users = cursor.fetchall()
+    connection.close()
+    return jsonify(users), 200
 
-# @app.route('/users/<user_id>')
-# @token_required
-# def users_index(user_id):
-#     # If the user is looking for the details of another user, block the request
-#     # Send a 403 status code to indicate that the user is unauthorized
-#     if user_id != g.user["id"]:
-#         return jsonify({"err": "Unauthorized"}), 403
-#     connection = get_db_connection()
-#     cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-#     cursor.execute("SELECT id, username FROM users WHERE id = %s;", (user_id))
-#     user = cursor.fetchone()
-#     connection.close()
-#     if user is None:
-#         return jsonify({"err": "User not found"}), 404
-#     return jsonify(user), 200
+@authentication_blueprint.route('/users/<user_id>')
+@token_required
+def user_show(user_id):
+    # If the user is looking for the details of another user, block the request
+    # Send a 403 status code to indicate that the user is unauthorized
+    if user_id != g.user["id"]:
+        return jsonify({"err": "Unauthorized"}), 403
+    connection = get_db_connection()
+    cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cursor.execute("SELECT id, username FROM users WHERE id = %s;", (user_id,))
+    user = cursor.fetchone()
+    connection.close()
+    if user is None:
+        return jsonify({"err": "User not found"}), 404
+    return jsonify(user), 200
