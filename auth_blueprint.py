@@ -5,13 +5,13 @@ import jwt
 import psycopg2, psycopg2.extras
 import bcrypt
 from auth_middleware import token_required
+from db_helpers import get_db_connection
+
 
 authentication_blueprint = Blueprint('authentication_blueprint', __name__)
 
-
-
     
-@app.route('/auth/sign-up', methods=['POST'])
+@authentication_blueprint.route('/auth/sign-up', methods=['POST'])
 def sign_up():
     try:
         new_user_data = request.get_json()
@@ -33,7 +33,7 @@ def sign_up():
     except Exception as err:
         return jsonify({"err": str(err)}), 401
 
-@app.route('/auth/sign-in', methods=["POST"])
+@authentication_blueprint.route('/auth/sign-in', methods=["POST"])
 def sign_in():
     try:
         sign_in_form_data = request.get_json()
@@ -54,28 +54,28 @@ def sign_in():
     finally:
         connection.close()
 
-@app.route('/users')
-@token_required
-def users_index():
-    connection = get_db_connection()
-    cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    cursor.execute("SELECT id, username FROM users;")
-    users = cursor.fetchall()
-    connection.close()
-    return jsonify(users), 200
+# @app.route('/users')
+# @token_required
+# def users_index():
+#     connection = get_db_connection()
+#     cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+#     cursor.execute("SELECT id, username FROM users;")
+#     users = cursor.fetchall()
+#     connection.close()
+#     return jsonify(users), 200
 
-@app.route('/users/<user_id>')
-@token_required
-def users_index(user_id):
-    # If the user is looking for the details of another user, block the request
-    # Send a 403 status code to indicate that the user is unauthorized
-    if user_id != g.user["id"]:
-        return jsonify({"err": "Unauthorized"}), 403
-    connection = get_db_connection()
-    cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    cursor.execute("SELECT id, username FROM users WHERE id = %s;", (user_id))
-    user = cursor.fetchone()
-    connection.close()
-    if user is None:
-        return jsonify({"err": "User not found"}), 404
-    return jsonify(user), 200
+# @app.route('/users/<user_id>')
+# @token_required
+# def users_index(user_id):
+#     # If the user is looking for the details of another user, block the request
+#     # Send a 403 status code to indicate that the user is unauthorized
+#     if user_id != g.user["id"]:
+#         return jsonify({"err": "Unauthorized"}), 403
+#     connection = get_db_connection()
+#     cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+#     cursor.execute("SELECT id, username FROM users WHERE id = %s;", (user_id))
+#     user = cursor.fetchone()
+#     connection.close()
+#     if user is None:
+#         return jsonify({"err": "User not found"}), 404
+#     return jsonify(user), 200

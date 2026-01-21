@@ -17,7 +17,7 @@ pipenv shell
 Install the dependencies:
 
 ```bash
-pyenv sync
+pipenv sync
 ```
 
 Run the Flask app:
