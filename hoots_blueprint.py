@@ -7,7 +7,22 @@ hoots_blueprint = Blueprint('hoots_blueprint', __name__)
 
 @hoots_blueprint.route('/hoots', methods=['GET'])
 def hoots_index():
-    return jsonify({'message': 'hoots index lives here'})
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute("""SELECT h.id, h.author AS hoot_author_id, h.title, h.text, h.category, u_hoot.username AS author_username, c.id AS comment_id, c.text AS comment_text, u_comment.username AS comment_author_username
+                            FROM hoots h
+                            INNER JOIN users u_hoot ON h.author = u_hoot.id
+                            LEFT JOIN comments c ON h.id = c.hoot
+                            LEFT JOIN users u_comment ON c.author = u_comment.id;
+                       """)
+        hoots = cursor.fetchall()
+        connection.commit()
+        connection.close()
+        return jsonify({"hoots": hoots}), 200
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
+
 
 @hoots_blueprint.route('/hoots', methods=['POST'])
 @token_required
@@ -30,3 +45,4 @@ def create_hoot():
         return jsonify({'hoot': created_hoot}), 201
     except Exception as error:
         return jsonify({'error': str(error)}), 500
+    
