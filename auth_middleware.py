@@ -12,6 +12,7 @@ def token_required(f):
         try:
             token = authorization_header.split(' ')[1]
             token_data = jwt.decode(token, os.getenv('JWT_SECRET'), algorithms=["HS256"])
+            print("Token data:", token_data) 
             g.user = token_data
         except Exception as error:
             return jsonify({"error": str(error)}), 500
