@@ -56,7 +56,7 @@ def show_hoot(hoot_id):
                        SELECT h.id, h.author AS hoot_author_id, h.title, h.text, h.category, u_hoot.username AS author_username, c.id AS comment_id, c.text AS comment_text, u_comment.username AS comment_author_username
                        FROM hoots h
                        INNER JOIN users u_hoot ON h.author = u_hoot.id
-                       LEFT JOIN comments c ON h.d = c.hoot
+                       LEFT JOIN comments c ON h.id = c.hoot
                        LEFT JOIN users u_Comment ON c.author = u_comment.id
                        WHERE h.id = %s;
                        """,
@@ -74,3 +74,4 @@ def show_hoot(hoot_id):
         return jsonify({'error': str(error)}), 500
     
     
+

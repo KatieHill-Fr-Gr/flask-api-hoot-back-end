@@ -11,7 +11,6 @@ def get_db_connection():
     return connection
 
 def consolidate_comments_in_hoots(hoots_with_comments):
-    print(hoots_with_comments)
 
     # creates a new list of consolidated_hoots (with the comments)
     consolidated_hoots = []
