@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request, g
-from db_helpers import get_db_connection
+from db_helpers import get_db_connection, consolidate_comments_in_hoots
 import psycopg2, psycopg2.extras
 from auth_middleware import token_required
 
@@ -17,9 +17,10 @@ def hoots_index():
                             LEFT JOIN users u_comment ON c.author = u_comment.id;
                        """)
         hoots = cursor.fetchall()
+        consolidated_hoots = consolidate_comments_in_hoots(hoots)
         connection.commit()
         connection.close()
-        return jsonify({"hoots": hoots}), 200
+        return jsonify({"hoots": consolidated_hoots}), 200
     except Exception as error:
         return jsonify({"error": str(error)}), 500
 
