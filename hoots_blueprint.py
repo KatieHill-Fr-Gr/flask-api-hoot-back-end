@@ -72,6 +72,32 @@ def show_hoot(hoot_id):
             return jsonify({'error': 'Hoot not found'}), 404
     except Exception as error:
         return jsonify({'error': str(error)}), 500
+
+
+@hoots_blueprint.route('/hoots/<hoot_id>', methods=['PUT'])
+@token_required
+def update_hoot(hoot_id):
+    try: 
+        updated_hoot_data = request.json
+        connection = get_db_connection()
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute("SELECT * FROM hoots WHERE hoots.id = %s", (hoot_id,))
+        hoot_to_update = cursor.fetchone()
+        if hoot_to_update is None:
+            return jsonify({'error': 'hoot not found'}), 404
+        connection.commit()
+        if hoot_to_update['author'] is not g.user['id']:
+            return jsonify({'error': 'Unauthorized'}), 401
+        cursor.execute('UPDATE hoots SET title = %s, text = %s, category = %s WHERE hoots.id = %s RETURNING *',
+                       (updated_hoot_data['title'], updated_hoot_data['text'], updated_hoot_data['category'], hoot_id))
+        updated_hoot = cursor.fetchone()
+        connection.commit()
+        connection.close()
+        return jsonify({'hoot': updated_hoot}), 200
+    except Exception as error:
+        return jsonify({'error': str(error)}), 500
+
+
     
     
 

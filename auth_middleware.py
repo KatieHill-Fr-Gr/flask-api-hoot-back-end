@@ -13,7 +13,7 @@ def token_required(f):
             token = authorization_header.split(' ')[1]
             token_data = jwt.decode(token, os.getenv('JWT_SECRET'), algorithms=["HS256"])
             print("Token data:", token_data) 
-            g.user = token_data
+            g.user = token_data["payload"] # best not to nest data in payload, avoid in future
         except Exception as error:
             return jsonify({"error": str(error)}), 500
         return f(*args, **kwargs)
