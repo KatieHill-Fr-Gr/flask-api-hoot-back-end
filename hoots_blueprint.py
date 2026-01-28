@@ -86,7 +86,7 @@ def update_hoot(hoot_id):
         if hoot_to_update is None:
             return jsonify({'error': 'hoot not found'}), 404
         connection.commit()
-        if hoot_to_update['author'] is not g.user['id']:
+        if hoot_to_update['author'] != g.user['id']:
             return jsonify({'error': 'Unauthorized'}), 401
         cursor.execute('UPDATE hoots SET title = %s, text = %s, category = %s WHERE hoots.id = %s RETURNING *',
                        (updated_hoot_data['title'], updated_hoot_data['text'], updated_hoot_data['category'], hoot_id))
@@ -98,6 +98,24 @@ def update_hoot(hoot_id):
         return jsonify({'error': str(error)}), 500
 
 
-    
-    
+@hoots_blueprint.route('/hoots/<hoot_id>', methods=['DELETE'])
+@token_required
+def delete_hoot(hoot_id):
+    try: 
+        connection = get_db_connection()
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT * FROM hoots WHERE hoots.id = %s', (hoot_id,))
+        hoot_to_delete = cursor.fetchone()
+        if hoot_to_delete is None:
+            return jsonify({'error': 'hoot not found'}), 404
+        connection.commit()
+        if hoot_to_delete['author'] != g.user['id']:
+            return jsonify({'error': 'Unauthorized'}), 401
+        cursor.execute('DELETE FROM hoots WHERE hoots.id = %s', (hoot_id,))
+        connection.commit()
+        connection.close()
+        return jsonify({'message': 'hoot deleted successfully'}), 200
+    except Exception as error:
+        return jsonify({'error': str(error)}), 500
+
 
