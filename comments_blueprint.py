@@ -29,9 +29,10 @@ def create_comment(hoot_id):
     except Exception as error:
         return jsonify({'error': str(error)}), 500
     
+    
 @comments_blueprint.route('/hoots/<hoot_id>/comments/<comment_id>', methods=['PUT'])
 @token_required
-def update_comment(comment_id):
+def update_comment(hoot_id, comment_id):
     try:
         updated_comment_data = request.json
         connection = get_db_connection()
