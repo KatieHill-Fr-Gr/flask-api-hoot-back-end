@@ -51,3 +51,22 @@ def update_comment(hoot_id, comment_id):
         return jsonify({'comment': updated_comment}), 201
     except Exception as error:
         return jsonify({'error': str(error)}), 500
+    
+@comments_blueprint.route('/hoots/<hoot_id>/comments/<comment_id>', methods=['DELETE'])
+@token_required
+def delete_comment(hoot_id, comment_id):
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT * FROM comments WHERE id = %s', (comment_id,))
+        comment_to_update = cursor.fetchone()
+        if comment_to_update is None:
+            return jsonify({'error': 'Comment not found'}), 404
+        if comment_to_update['author'] != g.user['id']:
+            return jsonify({'error': 'Unauthorised'}), 401
+        cursor.execute('DELETE FROM comments WHERE id = %s')
+        connection.commit()
+        connection.close()
+        return jsonify({'message': 'Comment deleted successfully'}), 200
+    except Exception as error:
+        return jsonify({'error': str(error)}), 500
