@@ -64,7 +64,7 @@ def delete_comment(hoot_id, comment_id):
             return jsonify({'error': 'Comment not found'}), 404
         if comment_to_update['author'] != g.user['id']:
             return jsonify({'error': 'Unauthorised'}), 401
-        cursor.execute('DELETE FROM comments WHERE id = %s')
+        cursor.execute('DELETE FROM comments WHERE id = %s', (comment_id,))
         connection.commit()
         connection.close()
         return jsonify({'message': 'Comment deleted successfully'}), 200
