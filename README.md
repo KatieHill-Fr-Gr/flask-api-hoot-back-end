@@ -1,4 +1,4 @@
-# Backend for a blogging app built with Flask
+# Flask Blogging API – Backend Template
 
 ## Tech stack
 
@@ -12,7 +12,7 @@ alt=“PostgreSQL” width="40" height="40" />
 ## About
 
 
-This repository contains a Flask backend template for a blogging API. It was built as a learning project based on a General Assembly tutorial. It follows a modular structure using Flask blueprints to support scalability and maintainability, and implements token-based authentication with a user model, sign-up and sign-in routes, and JWT token generation. Dependencies are listed in the `requirements.txt` file for a quick and easy setup.
+This repository contains a Flask backend template for a blogging app. It was built as a learning project based on a General Assembly tutorial. It follows a modular structure using Flask blueprints to support scalability and maintainability, and implements token-based authentication with a user model, sign-up and sign-in routes, and JWT token generation. Dependencies are listed in the `requirements.txt` file for a quick and easy setup.
 
 
 ## Installation
